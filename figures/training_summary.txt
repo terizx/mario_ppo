@@ -1,0 +1,8 @@
+
+Training Summary:
+----------------
+Total Steps: 5.00M
+Total Episodes: 8,063
+Best Mean Reward (100-ep): 1348.76
+Stage Clears: 6,012
+Clear Rate: 74.56%

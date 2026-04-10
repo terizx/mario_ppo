@@ -1,0 +1,19 @@
+# Python缓存（不用上传）
+__pycache__/
+*.py[cod]
+
+# 模型文件（太大，不上传，但保留在你电脑）
+*.pt
+*.pth
+
+# 日志和记录（太大）
+logs/
+recordings/
+recordings_old/
+
+# 旧文件
+figures_old/
+*_副本.csv
+
+# 系统垃圾
+.DS_Store

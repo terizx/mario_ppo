@@ -1,0 +1,36 @@
+# ============================================================
+# Super Mario Bros PPO - Python Dependencies
+# Tested on: macOS (Apple M1), Python 3.11
+# ============================================================
+
+# --- Core RL Environment ---
+# WARNING: Do NOT upgrade gym or nes-py.
+# These exact versions are required for compatibility with
+# gym-super-mario-bros on both Apple Silicon and standard setups.
+gym==0.26.2
+nes-py==8.2.1
+gym-super-mario-bros==7.4.0
+
+# --- Deep Learning ---
+# For Apple Silicon (MPS backend), install PyTorch via:
+#   pip install torch torchvision torchaudio
+# For CUDA, visit https://pytorch.org/get-started/locally/
+torch>=2.0.0
+torchvision>=0.15.0
+
+# --- RL Utilities (VecEnv, frame stacking) ---
+stable-baselines3==1.8.0
+
+# --- Image Processing ---
+opencv-python>=4.7.0
+
+# --- Numerical Computing ---
+# numpy<2.0.0 required: nes-py and gym 0.26.x are incompatible with numpy 2.x
+numpy>=1.24.0,<2.0.0
+
+# --- Training Visualization ---
+tensorboard>=2.13.0
+matplotlib>=3.7.0
+
+# --- Gym API Compatibility ---
+shimmy>=0.2.0
