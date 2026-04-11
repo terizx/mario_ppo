@@ -4,9 +4,10 @@
 # ============================================================
 
 # --- Core RL Environment ---
-# WARNING: Do NOT upgrade gym or nes-py.
-# These exact versions are required for compatibility with
-# gym-super-mario-bros on both Apple Silicon and standard setups.
+# WARNING: Do NOT upgrade these three packages.
+# gym==0.26.2, nes-py==8.2.1, and stable-baselines3==1.8.0 are
+# pinned together for API compatibility with gym-super-mario-bros.
+# Newer versions of gym or nes-py will break the environment wrappers.
 gym==0.26.2
 nes-py==8.2.1
 gym-super-mario-bros==7.4.0
@@ -18,7 +19,8 @@ gym-super-mario-bros==7.4.0
 torch>=2.0.0
 torchvision>=0.15.0
 
-# --- RL Utilities (VecEnv, frame stacking) ---
+# --- RL Utilities (SubprocVecEnv / DummyVecEnv / VecFrameStack) ---
+# Must match gym==0.26.2; do not upgrade.
 stable-baselines3==1.8.0
 
 # --- Image Processing ---
@@ -31,6 +33,10 @@ numpy>=1.24.0,<2.0.0
 # --- Training Visualization ---
 tensorboard>=2.13.0
 matplotlib>=3.7.0
+
+# --- Video Recording (used by record_video.py) ---
+imageio>=2.28.0
+imageio-ffmpeg>=0.4.9
 
 # --- Gym API Compatibility ---
 shimmy>=0.2.0
