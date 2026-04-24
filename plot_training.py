@@ -11,13 +11,12 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.ticker import FuncFormatter, PercentFormatter
 
-# ── 配置 ─────────────────────────────────────────────────────────
+
 LOG_DIR     = "./logs/"
-SMOOTH_WIN  = 80        # reward 平滑窗口
+SMOOTH_WIN  = 80        
 OUTPUT_DIR  = "./figures/"
 DPI         = 300
 
-# 学术风格配色（Colorblind-friendly）
 COLORS = ['#0173B2', '#DE8F05', '#029E73', '#D55E00', '#CC78BC', '#CA9161']
 
 
@@ -45,7 +44,6 @@ def fmt_K(x, _):
 
 
 def setup_academic_style():
-    """设置学术期刊风格"""
     plt.rcParams.update({
         'font.family': 'serif',
         'font.serif': ['Times New Roman', 'DejaVu Serif'],
@@ -75,14 +73,7 @@ def setup_academic_style():
 # ─────────────────────────────────────────────────────────────────────────────
 def plot_reward_learning_curve(df, filename="mean_reward_curve.png",
                                 title_prefix="PPO"):
-    """
-    生成仿 DDQN 风格的 Reward 曲线：
-    - 横坐标更长（全部训练步数，可用 xlim 参数延伸）
-    - 原始 episode reward 显示为半透明浅蓝色 fill_between
-    - 100-ep 滚动均值显示为深蓝色实线
-    - First Clear 用红色虚线标注
-    - best checkpoint 用红星标注
-    """
+  
     sources = df['source'].unique()
     fig, ax = plt.subplots(figsize=(10, 5))   
 
@@ -177,11 +168,7 @@ def plot_reward_learning_curve(df, filename="mean_reward_curve.png",
 #  Stage Clear Rate 
 # ─────────────────────────────────────────────────────────────────────────────
 def plot_clear_rate(df, win=500, filename="clear_rate.png", title_prefix="PPO"):
-    """
-    计算并绘制 500-episode rolling clear rate（百分比），
-    仿 DDQN Stage Clear Rate 图风格。
-    需要列：episode (或 index), flag_get
-    """
+   
     if 'flag_get' not in df.columns:
         print("[Skip] 'flag_get' column not found — cannot plot clear rate")
         return
@@ -232,6 +219,65 @@ def plot_clear_rate(df, win=500, filename="clear_rate.png", title_prefix="PPO"):
     print(f'[Saved] {out}')
     plt.close()
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  Stage Clear Rate (by Environment Steps)
+# ─────────────────────────────────────────────────────────────────────────────
+def plot_clear_rate_by_step(df, win=500, filename="clear_rate_by_step.png", title_prefix="PPO"):
+  
+    if 'flag_get' not in df.columns or 'step' not in df.columns:
+        print("[Skip] 'flag_get' or 'step' column not found — cannot plot clear rate by step")
+        return
+
+    sources = df['source'].unique()
+    fig, ax = plt.subplots(figsize=(10, 4.5))
+
+    for i, src in enumerate(sources):
+        sub = df[df['source'] == src].copy().reset_index(drop=True)
+        c = COLORS[i % len(COLORS)]
+
+        x = sub['step'].values
+        flags = sub['flag_get'].fillna(0).values
+
+       
+        if 'episode' in sub.columns:
+            ep_idx = sub['episode'].values
+        else:
+            ep_idx = np.arange(len(sub))
+
+    
+        cr = pd.Series(flags).rolling(window=win, min_periods=1).mean().values * 100
+
+       
+        ax.fill_between(x, 0, cr, alpha=0.18, color=c)
+        ax.plot(x, cr, color=c, linewidth=2.2,
+                label=src if len(sources) > 1 else 'Clear Rate')
+
+        
+        clear_idx = np.where(flags > 0)[0]
+        if len(clear_idx) > 0:
+            fc_step = x[clear_idx[0]]
+            fc_ep = ep_idx[clear_idx[0]] if 'episode' in sub.columns else clear_idx[0]
+            ax.axvline(fc_step, color='#E74C3C', alpha=0.85,
+                     linewidth=1.8, linestyle='--',
+                     label=f'First Clear (Step {fc_step/1000:.0f}K, Ep {fc_ep:,})')
+
+    ax.set_xlabel('Environment Steps')
+    ax.set_ylabel('Clear Rate (%)')
+    ax.set_title(f'{title_prefix} — Stage Clear Rate ({win}-ep Rolling)\n'
+                 'Super Mario Bros World 1-1', fontsize=13)
+    ax.yaxis.set_major_formatter(PercentFormatter())
+    ax.xaxis.set_major_formatter(FuncFormatter(fmt_M))
+    ax.set_ylim(bottom=0)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.legend(frameon=True, fancybox=False, edgecolor='#CCCCCC',
+              loc='upper left', framealpha=0.9, fontsize=9)
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    out = os.path.join(OUTPUT_DIR, filename)
+    plt.savefig(out, facecolor='white', edgecolor='none')
+    print(f'[Saved] {out}')
+    plt.close()
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Original single-metric plots (unchanged)
@@ -313,7 +359,7 @@ def generate_all_plots(df, algo_name="PPO"):
         else:
             print(f"[Skip] Column '{ycol}' not found")
 
-    # ── NEW: DDQN-style reward curve ──────────────────────────────
+    # ── NEW: reward curve ──────────────────────────────
     print("\n[Generating mean reward curve...]")
     plot_reward_learning_curve(df, filename="mean_reward_curve.png",
                            title_prefix=algo_name)
@@ -322,6 +368,11 @@ def generate_all_plots(df, algo_name="PPO"):
     print("[Generating clear rate plot...]")
     plot_clear_rate(df, win=500, filename="clear_rate.png",
                     title_prefix=algo_name)
+                    
+     # ── NEW: Clear rate plot (by step) ───────────────────────────
+    print("[Generating clear rate plot (by step)...]")
+    plot_clear_rate_by_step(df, win=500, filename="clear_rate_by_step.png",
+                            title_prefix=algo_name)
 
     # ── Compare if multiple sources ────────────────────────────────
     sources = df['source'].unique()
@@ -358,6 +409,8 @@ Clear Rate: {total_clears/total_eps*100:.2f}%
     with open(os.path.join(OUTPUT_DIR, 'training_summary.txt'), 'w') as f:
         f.write(summary)
     print(f"[Saved] {OUTPUT_DIR}training_summary.txt")
+
+
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ A PyTorch implementation of **Proximal Policy Optimization (PPO)** trained on th
 
 ## 📺 Demo
 
-![Mario PPO Demo](figures/mario_ppo_best_run.gif)
+![Mario PPO Demo](recordings/mario_ppo_1-1_best_run.gif)
 
 > The agent achieves a **74.6% overall clear rate** on World 1-1, reaching **94.6%** in the final training phase.
 
