@@ -1,6 +1,13 @@
-# Python缓存（不用上传）
-__pycache__/
-*.py[cod]
+# 训练产物
+logs/
+recordings/*.mp4
+eval_100ep_1_1.csv
 
-# 系统垃圾
+# Python
+__pycache__/
+*.pyc
 .DS_Store
+
+# 环境
+.env
+venv/
